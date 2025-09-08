@@ -58,10 +58,10 @@ Este é um sistema completo para gerenciamento de tarefas pessoais ou em equipe.
 
 ```bash
 # Frontend
-git clone <url-repositorio-frontend>
+git clone https://github.com/Art109/TodoListFrontEnd
 
 # Backend (em outro terminal)
-git clone <url-repositorio-backend>
+git clone https://github.com/Art109/TodoListBackend
 
 
 2. Configuração do Backend

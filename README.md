@@ -59,29 +59,21 @@ Este é um sistema completo para gerenciamento de tarefas pessoais ou em equipe.
 ```bash
 # Frontend
 git clone <url-repositorio-frontend>
-cd todo-list-frontend
 
 # Backend (em outro terminal)
 git clone <url-repositorio-backend>
-cd todo-list-backend
 
 
 2. Configuração do Backend
 bash
 # Entre na pasta do backend
-cd todo-list-backend
 
 # Instale as dependências
 npm install
 
-# Copie o arquivo de exemplo e configure
-cp .env.example .env
+# Crie um arquivo .env
 
 # Edite o arquivo .env com suas credenciais do MongoDB
-# Use um editor de texto ou IDE para configurar:
-nano .env
-# ou
-code .env
 
 
 3. Configuração do MongoDB

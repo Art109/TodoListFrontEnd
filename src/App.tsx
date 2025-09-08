@@ -3,36 +3,57 @@ import { type Task } from "./types/Task";
 import TaskForm from "./components/TaskForm";
 import TaskList from "./components/TaskList";
 import TaskModal from "./components/TaskModal";
+import TaskFilters from "./components/TaskFilters";
 import { taskService } from "./services/api";
 import "./App.css";
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setloading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [currentFilters, setCurrentFilters] = useState<{
+    favorite?: boolean;
+    color?: number;
+  }>(() => {
+    const savedFilters = localStorage.getItem("taskFilters");
+    return savedFilters ? JSON.parse(savedFilters) : {};
+  });
 
-  const loadTasks = async () => {
+  const loadTasks = async (filters?: {
+    favorite?: boolean;
+    color?: number;
+  }) => {
     try {
-      setloading(true);
+      setLoading(true);
       setError(null);
-      const tasksData = await taskService.getAllTasks();
+      const tasksData = await taskService.getAllTasks(filters);
       setTasks(tasksData);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "An error ocurred");
+      setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
-      setloading(false);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadTasks();
-  }, []);
+    localStorage.setItem("taskFilters", JSON.stringify(currentFilters));
+    loadTasks(currentFilters);
+  }, [currentFilters]);
+
+  const handleFilter = (filters: { favorite?: boolean; color?: number }) => {
+    setCurrentFilters(filters);
+  };
+
+  const handleClearFilters = () => {
+    setCurrentFilters({});
+  };
 
   const handleTaskCreated = async (newTaskData: Omit<Task, "_id" | "__v">) => {
     try {
+      setLoading(true);
       await taskService.createTask(newTaskData);
-      await loadTasks();
+      await loadTasks(currentFilters);
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Failed to create task"
@@ -48,7 +69,7 @@ function App() {
       await taskService.updateTask(taskId, {
         favorite: newFavoriteValue, // Use o novo valor diretamente
       });
-      await loadTasks();
+      await loadTasks(currentFilters);
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Failed to update task"
@@ -65,7 +86,7 @@ function App() {
       await taskService.updateTask(taskId, {
         complete: !currentComplete,
       });
-      await loadTasks();
+      await loadTasks(currentFilters);
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Failed to update task"
@@ -84,7 +105,7 @@ function App() {
   const handleDeleteTask = async (taskId: string) => {
     try {
       await taskService.deleteTask(taskId);
-      await loadTasks(); // Recarrega a lista após deletar
+      await loadTasks(currentFilters); // Recarrega a lista após deletar
       handleCloseModal(); // Fecha o modal se estiver aberto
     } catch (error) {
       setError(
@@ -97,12 +118,19 @@ function App() {
   if (error) return <div className="error">Error: {error}</div>;
 
   return (
-    <div className="app-header">
-      <header>
-        <h1>Minha To-Do List</h1>
+    <div className="app-container">
+      <header className="app-header">
+        <h1>📋 Painel de Tarefas</h1>
+        <p>Organize suas atividades diárias</p>
       </header>
 
       <TaskForm onTaskCreated={handleTaskCreated} />
+
+      <TaskFilters
+        onFilter={handleFilter}
+        onClear={handleClearFilters}
+        currentFilters={currentFilters}
+      />
 
       <TaskList
         tasks={tasks}
@@ -115,7 +143,7 @@ function App() {
         <TaskModal
           task={selectedTask}
           onClose={handleCloseModal}
-          onUpdate={loadTasks} // Recarrega a lista após atualizar
+          onUpdate={() => loadTasks(currentFilters)}
           onDelete={handleDeleteTask}
         />
       )}

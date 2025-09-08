@@ -3,7 +3,7 @@ import { taskService } from "../services/api";
 import { type Task } from "../types/Task";
 import { formatDate } from "../utils/dateFormatter";
 import PriorityDropdown from "./PriorityDropdown";
-import { PRIORITY_MAP } from "../constants/priorities"; // Importe o PRIORITY_MAP
+import { PRIORITY_MAP } from "../constants/priorities";
 import FavoriteButton from "./FavoriteButton";
 
 interface TaskModalProps {
@@ -19,18 +19,26 @@ function TaskModal({ task, onClose, onUpdate, onDelete }: TaskModalProps) {
   const [color, setColor] = useState(task.color || 0);
   const [isFavorite, setIsFavorite] = useState(task.favorite || false);
   const [isComplete, setIsComplete] = useState(task.complete || false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Obter a prioridade atual para o header
   const currentPriority = PRIORITY_MAP[task.color || 0];
 
-  // Atualiza os estados quando a task muda
   useEffect(() => {
-    setName(task.name);
-    setDescription(task.description || "");
-    setColor(task.color || 0);
-    setIsFavorite(task.favorite || false);
-    setIsComplete(task.complete || false);
-  }, [task]);
+    if (!isEditing) {
+      setName(task.name);
+      setDescription(task.description || "");
+      setColor(task.color || 0);
+      setIsFavorite(task.favorite || false);
+      setIsComplete(task.complete || false);
+    }
+  }, [task, isEditing]);
+
+  const handleInputChange = () => {
+    if (!isEditing) {
+      setIsEditing(true);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,19 +50,23 @@ function TaskModal({ task, onClose, onUpdate, onDelete }: TaskModalProps) {
         favorite: isFavorite,
         complete: isComplete,
       });
-      onUpdate(); // Recarrega a lista
-      onClose(); // Fecha o modal
+      setIsEditing(false);
+      onUpdate();
+      onClose();
     } catch (error) {
       console.error("Error updating task:", error);
     }
   };
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this task?")) {
+    if (window.confirm("Tem certeza que deseja excluir esta tarefa?")) {
+      setIsDeleting(true);
       try {
         await onDelete(task._id);
       } catch (error) {
         console.error("Error deleting task:", error);
+      } finally {
+        setIsDeleting(false);
       }
     }
   };
@@ -62,7 +74,6 @@ function TaskModal({ task, onClose, onUpdate, onDelete }: TaskModalProps) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        {/* Header com Complete, Favorito e Fechar */}
         <div
           className="modal-header"
           style={{
@@ -75,16 +86,39 @@ function TaskModal({ task, onClose, onUpdate, onDelete }: TaskModalProps) {
               <input
                 type="checkbox"
                 checked={isComplete}
-                onChange={(e) => setIsComplete(e.target.checked)}
+                onChange={(e) => {
+                  setIsComplete(e.target.checked);
+                  handleInputChange();
+                }}
               />
             </label>
 
             <FavoriteButton
               isFavorite={isFavorite}
-              onChange={setIsFavorite}
-              size={32} // Aumentei de 24 para 32
+              onChange={(value) => {
+                setIsFavorite(value);
+                handleInputChange();
+              }}
+              size={32}
               className="modal-favorite"
             />
+          </div>
+
+          <div className="task-dates">
+            <div className="date-info">
+              <span className="date-label">Criada em:</span>
+              <span className="date-value">
+                {formatDate(task.startDate.toString())}
+              </span>
+            </div>
+            {task.endDate && (
+              <div className="date-info">
+                <span className="date-label">Concluída em:</span>
+                <span className="date-value">
+                  {formatDate(task.endDate.toString())}
+                </span>
+              </div>
+            )}
           </div>
 
           <button className="close-btn" onClick={onClose}>
@@ -92,14 +126,16 @@ function TaskModal({ task, onClose, onUpdate, onDelete }: TaskModalProps) {
           </button>
         </div>
 
-        {/* Corpo do Modal */}
         <div className="modal-body">
           <form onSubmit={handleSubmit} className="modal-form">
             <div className="form-group">
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  handleInputChange();
+                }}
                 required
               />
             </div>
@@ -108,7 +144,10 @@ function TaskModal({ task, onClose, onUpdate, onDelete }: TaskModalProps) {
               <label>Descrição:</label>
               <textarea
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                  handleInputChange();
+                }}
                 placeholder="Adicione uma descrição detalhada..."
               />
             </div>
@@ -117,21 +156,25 @@ function TaskModal({ task, onClose, onUpdate, onDelete }: TaskModalProps) {
               <label>Prioridade:</label>
               <PriorityDropdown
                 value={color}
-                onChange={setColor}
+                onChange={(value) => {
+                  setColor(value);
+                  handleInputChange();
+                }}
                 className="priority-dropdown-modal"
               />
             </div>
 
             <div className="modal-actions-bottom">
               <button type="submit" className="btn btn-primary">
-                💾 Salvar
+                💾 {isEditing ? "Salvar" : "Fechar"}
               </button>
               <button
                 type="button"
                 onClick={handleDelete}
                 className="btn btn-delete"
+                disabled={isDeleting}
               >
-                🗑️ Excluir
+                {isDeleting ? "🔄 Excluindo..." : "🗑️ Excluir"}
               </button>
             </div>
           </form>

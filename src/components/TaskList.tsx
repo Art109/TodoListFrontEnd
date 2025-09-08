@@ -10,9 +10,6 @@ interface TaskListProps {
   onOpenModal: (task: Task) => void;
 }
 
-// Não precisa mais disso, já que vamos usar PRIORITY_MAP diretamente
-// const colorMap = PRIORITY_MAP;
-
 function TaskList({
   tasks,
   onToggleFavorite,
@@ -22,6 +19,19 @@ function TaskList({
   if (tasks.length === 0) {
     return <p>No tasks found</p>;
   }
+
+  const handleCheckboxClick = (
+    e: React.MouseEvent<HTMLInputElement>,
+    taskId: string,
+    currentComplete: boolean
+  ) => {
+    e.stopPropagation();
+    onToggleComplete(taskId, currentComplete);
+  };
+
+  const handleFavoriteClick = (taskId: string, isFavorite: boolean) => {
+    onToggleFavorite(taskId, isFavorite);
+  };
 
   return (
     <div className="task-list">
@@ -42,27 +52,29 @@ function TaskList({
             <input
               type="checkbox"
               checked={task.complete || false}
-              onChange={(e) => {
-                console.log("Checkbox clicked - should not open modal");
-                e.stopPropagation();
-                onToggleComplete(task._id, task.complete || false);
-              }}
-              onClick={(e) => {
-                console.log("Checkbox onClick - stopping propagation");
-                e.stopPropagation();
-              }}
+              onChange={() =>
+                onToggleComplete(task._id, task.complete || false)
+              }
+              onClick={(e) =>
+                handleCheckboxClick(e, task._id, task.complete || false)
+              }
               className="task-checkbox"
             />
 
             {/* Nome da task */}
             <h3 className="task-name">{task.name}</h3>
 
-            <FavoriteButton
-              isFavorite={task.favorite || false}
-              onChange={(isFavorite) => onToggleFavorite(task._id, isFavorite)}
-              size={28}
-              className="task-favorite"
-            />
+            {/* Botão favorito com prevenção de propagação */}
+            <div onClick={(e) => e.stopPropagation()}>
+              <FavoriteButton
+                isFavorite={task.favorite || false}
+                onChange={(isFavorite) =>
+                  handleFavoriteClick(task._id, isFavorite)
+                }
+                size={28}
+                className="task-favorite"
+              />
+            </div>
 
             {/* Data formatada */}
             <span className="task-date">{formatDate(task.startDate)}</span>

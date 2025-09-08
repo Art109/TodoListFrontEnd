@@ -3,6 +3,10 @@ import { type Task } from "../types/Task";
 
 const API_URL = "http://localhost:3000";
 
+const api = axios.create({
+  baseURL: API_URL,
+});
+
 const handleError = (error: any, context: string) => {
   console.error(`API Error in ${context}:`, error);
   const message =
@@ -12,14 +16,12 @@ const handleError = (error: any, context: string) => {
 
 export const taskService = {
   // GET ALL (filtered)
-  getAllTasks: async (favorite?: boolean, color?: number): Promise<Task[]> => {
+  getAllTasks: async (filters?: {
+    favorite?: boolean;
+    color?: number;
+  }): Promise<Task[]> => {
     try {
-      const params = new URLSearchParams();
-      if (favorite !== undefined)
-        params.append("favorite", favorite.toString());
-      if (color !== undefined) params.append("color", color.toString());
-
-      const response = await axios.get(`${API_URL}/tasks?${params}`);
+      const response = await api.get("/tasks", { params: filters });
       return response.data;
     } catch (error) {
       return handleError(error, "getAllTasks");
@@ -29,7 +31,7 @@ export const taskService = {
   // CREATE task
   createTask: async (taskData: Omit<Task, "_id" | "__v">): Promise<Task> => {
     try {
-      const response = await axios.post(`${API_URL}/tasks`, taskData);
+      const response = await api.post("/tasks", taskData);
       return response.data;
     } catch (error) {
       return handleError(error, "createTask");
@@ -39,19 +41,20 @@ export const taskService = {
   // UPDATE task
   updateTask: async (id: string, taskData: Partial<Task>): Promise<Task> => {
     try {
-      const response = await axios.put(`${API_URL}/tasks/${id}`, taskData);
+      const response = await api.put(`/tasks/${id}`, taskData);
       return response.data;
     } catch (error) {
       return handleError(error, "updateTask");
     }
   },
 
-  //DELETE TASK
+  // DELETE task
   deleteTask: async (id: string): Promise<void> => {
     try {
-      await axios.delete(`${API_URL}/tasks/${id}`);
+      await api.delete(`/tasks/${id}`);
     } catch (error) {
-      return handleError(error, "deleteTask");
+      handleError(error, "deleteTask");
+      throw error;
     }
   },
 };

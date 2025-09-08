@@ -16,12 +16,12 @@ function TaskForm({ onTaskCreated }: TaskFormProps) {
     e.preventDefault();
 
     const newTaskData: Omit<Task, "_id" | "__v"> = {
-      name,
+      name: name.trim(),
       color: selectedColor,
       favorite: isFavorite,
       description: "",
       complete: false,
-      startDate: new Date().toDateString(),
+      startDate: new Date(),
       endDate: null,
     };
 
@@ -33,11 +33,11 @@ function TaskForm({ onTaskCreated }: TaskFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="task-form-horizontal">
-      {/* Grupo do input + favorito - AGORA JUNTOS */}
+      {/* Grupo do input + favorito */}
       <div className="form-group-horizontal input-with-favorite">
         <input
           type="text"
-          placeholder="Task name"
+          placeholder="Nome da Tarefa"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
@@ -63,7 +63,7 @@ function TaskForm({ onTaskCreated }: TaskFormProps) {
       {/* Botão de submit */}
       <div className="form-group-horizontal">
         <button type="submit" className="add-btn">
-          Add
+          Criar
         </button>
       </div>
     </form>

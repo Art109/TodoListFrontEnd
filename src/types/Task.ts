@@ -5,7 +5,7 @@ export interface Task {
   color?: number;
   favorite?: boolean;
   complete?: boolean;
-  startDate: string;
-  endDate?: string | null;
+  startDate: Date;
+  endDate?: Date | null;
   __v?: number; // Campo opcional do MongoDB
 }

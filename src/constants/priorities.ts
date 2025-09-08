@@ -1,9 +1,9 @@
 export interface PriorityOption {
   value: number;
-  color: string; // Cor principal (para bordas, textos)
+  color: string;
   label: string;
-  bgColor: string; // Cor de fundo (mais suave)
-  textColor: string; // Cor do texto
+  bgColor: string;
+  textColor: string;
 }
 
 export const PRIORITY_OPTIONS: PriorityOption[] = [

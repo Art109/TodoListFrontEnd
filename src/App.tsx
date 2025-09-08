@@ -42,15 +42,12 @@ function App() {
 
   const handleToggleFavorite = async (
     taskId: string,
-    currentFavorite: boolean
+    newFavoriteValue: boolean // Mude o nome do parâmetro
   ) => {
     try {
-      // 1. Atualiza no backend
       await taskService.updateTask(taskId, {
-        favorite: !currentFavorite,
+        favorite: newFavoriteValue, // Use o novo valor diretamente
       });
-
-      // 2. Recarrega TODAS as tasks para garantir ordenação correta
       await loadTasks();
     } catch (error) {
       setError(
@@ -100,7 +97,7 @@ function App() {
   if (error) return <div className="error">Error: {error}</div>;
 
   return (
-    <div className="app">
+    <div className="app-header">
       <header>
         <h1>Minha To-Do List</h1>
       </header>

@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { taskService } from "../services/api";
 import { type Task } from "../types/Task";
+import { formatDate } from "../utils/dateFormatter";
+import PriorityDropdown from "./PriorityDropdown";
+import { PRIORITY_MAP } from "../constants/priorities"; // Importe o PRIORITY_MAP
+import FavoriteButton from "./FavoriteButton";
 
 interface TaskModalProps {
   task: Task;
@@ -9,21 +13,15 @@ interface TaskModalProps {
   onDelete: (taskId: string) => void;
 }
 
-const colorOptions = [
-  { value: 0, color: "#cccccc", label: "No Color" },
-  { value: 1, color: "#0000ff", label: "Blue" },
-  { value: 2, color: "#00ff00", label: "Green" },
-  { value: 3, color: "#ffff00", label: "Yellow" },
-  { value: 4, color: "#ffa500", label: "Orange" },
-  { value: 5, color: "#ff0000", label: "Red" },
-];
-
 function TaskModal({ task, onClose, onUpdate, onDelete }: TaskModalProps) {
   const [name, setName] = useState(task.name);
   const [description, setDescription] = useState(task.description || "");
   const [color, setColor] = useState(task.color || 0);
   const [isFavorite, setIsFavorite] = useState(task.favorite || false);
   const [isComplete, setIsComplete] = useState(task.complete || false);
+
+  // Obter a prioridade atual para o header
+  const currentPriority = PRIORITY_MAP[task.color || 0];
 
   // Atualiza os estados quando a task muda
   useEffect(() => {
@@ -64,79 +62,80 @@ function TaskModal({ task, onClose, onUpdate, onDelete }: TaskModalProps) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="close-btn" onClick={onClose}>
-          ✕
-        </button>
-
-        <h2>Edit Task</h2>
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Name:</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Description:</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Color:</label>
-            <div className="color-picker">
-              {colorOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={`color-option ${
-                    color === option.value ? "selected" : ""
-                  }`}
-                  style={{ backgroundColor: option.color }}
-                  onClick={() => setColor(option.value)}
-                  title={option.label}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>
-              <input
-                type="checkbox"
-                checked={isFavorite}
-                onChange={(e) => setIsFavorite(e.target.checked)}
-              />
-              ⭐ Favorite
-            </label>
-          </div>
-
-          <div className="form-group">
-            <label>
+        {/* Header com Complete, Favorito e Fechar */}
+        <div
+          className="modal-header"
+          style={{
+            backgroundColor: currentPriority.bgColor,
+            color: currentPriority.textColor,
+          }}
+        >
+          <div className="modal-actions-top">
+            <label className="modal-checkbox">
               <input
                 type="checkbox"
                 checked={isComplete}
                 onChange={(e) => setIsComplete(e.target.checked)}
               />
-              ✅ Complete
             </label>
+
+            <FavoriteButton
+              isFavorite={isFavorite}
+              onChange={setIsFavorite}
+              size={32} // Aumentei de 24 para 32
+              className="modal-favorite"
+            />
           </div>
 
-          <div className="modal-actions">
-            <button type="submit">Save Changes</button>
-            <button type="button" onClick={handleDelete} className="delete-btn">
-              🗑️ Delete Task
-            </button>
-          </div>
-        </form>
+          <button className="close-btn" onClick={onClose}>
+            ✕
+          </button>
+        </div>
+
+        {/* Corpo do Modal */}
+        <div className="modal-body">
+          <form onSubmit={handleSubmit} className="modal-form">
+            <div className="form-group">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Descrição:</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Adicione uma descrição detalhada..."
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Prioridade:</label>
+              <PriorityDropdown
+                value={color}
+                onChange={setColor}
+                className="priority-dropdown-modal"
+              />
+            </div>
+
+            <div className="modal-actions-bottom">
+              <button type="submit" className="btn btn-primary">
+                💾 Salvar
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="btn btn-delete"
+              >
+                🗑️ Excluir
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

@@ -1,18 +1,11 @@
 import { useState } from "react";
 import { type Task } from "../types/Task";
+import PriorityDropdown from "./PriorityDropdown";
+import FavoriteButton from "./FavoriteButton";
 
 interface TaskFormProps {
   onTaskCreated: (task: Omit<Task, "_id" | "__v">) => void;
 }
-
-const colorOptions = [
-  { value: 0, color: "#cccccc", label: "No Color" },
-  { value: 1, color: "#0000ff", label: "Blue" },
-  { value: 2, color: "#00ff00", label: "Green" },
-  { value: 3, color: "#ffff00", label: "Yellow" },
-  { value: 4, color: "#ffa500", label: "Orange" },
-  { value: 5, color: "#ff0000", label: "Red" },
-];
 
 function TaskForm({ onTaskCreated }: TaskFormProps) {
   const [name, setName] = useState("");
@@ -26,6 +19,10 @@ function TaskForm({ onTaskCreated }: TaskFormProps) {
       name,
       color: selectedColor,
       favorite: isFavorite,
+      description: "",
+      complete: false,
+      startDate: new Date().toDateString(),
+      endDate: null,
     };
 
     onTaskCreated(newTaskData);
@@ -35,46 +32,40 @@ function TaskForm({ onTaskCreated }: TaskFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="task-form">
-      <div className="form-group">
+    <form onSubmit={handleSubmit} className="task-form-horizontal">
+      {/* Grupo do input + favorito - AGORA JUNTOS */}
+      <div className="form-group-horizontal input-with-favorite">
         <input
           type="text"
           placeholder="Task name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
+          className="task-input"
+        />
+        <FavoriteButton
+          isFavorite={isFavorite}
+          onChange={setIsFavorite}
+          size={28}
+          className="favorite-in-input"
         />
       </div>
-      <div className="form-group">
-        <label>
-          <input
-            type="checkbox"
-            checked={isFavorite}
-            onChange={(e) => setIsFavorite(e.target.checked)}
-          />
-          ⭐ Favorite
-        </label>
+
+      {/* Dropdown de prioridades */}
+      <div className="form-group-horizontal">
+        <PriorityDropdown
+          value={selectedColor}
+          onChange={setSelectedColor}
+          className="priority-dropdown-form"
+        />
       </div>
 
-      <div className="form-group">
-        <label>Color:</label>
-        <div className="color-picker">
-          {colorOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={`color-option ${
-                selectedColor === option.value ? "selected" : ""
-              }`}
-              style={{ backgroundColor: option.color }}
-              onClick={() => setSelectedColor(option.value)}
-              title={option.label}
-            />
-          ))}
-        </div>
+      {/* Botão de submit */}
+      <div className="form-group-horizontal">
+        <button type="submit" className="add-btn">
+          Add
+        </button>
       </div>
-
-      <button type="submit">Add Task</button>
     </form>
   );
 }

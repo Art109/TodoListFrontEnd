@@ -1,4 +1,7 @@
 import { type Task } from "../types/Task";
+import { formatDate } from "../utils/dateFormatter";
+import { PRIORITY_MAP } from "../constants/priorities";
+import FavoriteButton from "./FavoriteButton";
 
 interface TaskListProps {
   tasks: Task[];
@@ -7,14 +10,8 @@ interface TaskListProps {
   onOpenModal: (task: Task) => void;
 }
 
-const colorMap: Record<number, string> = {
-  0: "#cccccc", // No Color
-  1: "#0000ff", // Blue
-  2: "#00ff00", // Green
-  3: "#ffff00", // Yellow
-  4: "#ffa500", // Orange
-  5: "#ff0000", // Red
-};
+// Não precisa mais disso, já que vamos usar PRIORITY_MAP diretamente
+// const colorMap = PRIORITY_MAP;
 
 function TaskList({
   tasks,
@@ -28,53 +25,50 @@ function TaskList({
 
   return (
     <div className="task-list">
-      {tasks.map((task) => (
-        <div
-          key={task._id}
-          className="task-item"
-          style={{
-            backgroundColor: colorMap[task.color || 0],
-            borderLeft: `5px solid ${colorMap[task.color || 0]}`,
-          }}
-        >
-          <h3>{task.name}</h3>
-          <p>Color: {task.color}</p>
-          <button
-            onClick={() => onToggleFavorite?.(task._id, task.favorite || false)}
-            className="favorite-btn"
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "1.5em",
-            }}
-          >
-            {task.favorite ? "⭐" : "☆"}
-          </button>
+      {tasks.map((task) => {
+        const priority = PRIORITY_MAP[task.color || 0];
 
-          <button
+        return (
+          <div
+            key={task._id}
+            className={`task-item ${task.complete ? "complete" : ""}`}
+            style={{
+              backgroundColor: priority.bgColor,
+              borderLeftColor: priority.color,
+            }}
             onClick={() => onOpenModal(task)}
-            style={{ marginLeft: "10px" }}
           >
-            📝 Editar
-          </button>
+            {/* Checkbox de completo */}
+            <input
+              type="checkbox"
+              checked={task.complete || false}
+              onChange={(e) => {
+                console.log("Checkbox clicked - should not open modal");
+                e.stopPropagation();
+                onToggleComplete(task._id, task.complete || false);
+              }}
+              onClick={(e) => {
+                console.log("Checkbox onClick - stopping propagation");
+                e.stopPropagation();
+              }}
+              className="task-checkbox"
+            />
 
-          <p>Data: {task.startDate}</p>
-          <button
-            onClick={() => onToggleComplete(task._id, task.complete || false)}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "1.2em",
-              marginLeft: "10px",
-            }}
-            title={task.complete ? "Mark as incomplete" : "Mark as complete"}
-          >
-            {task.complete ? "✅" : "⚪"}
-          </button>
-        </div>
-      ))}
+            {/* Nome da task */}
+            <h3 className="task-name">{task.name}</h3>
+
+            <FavoriteButton
+              isFavorite={task.favorite || false}
+              onChange={(isFavorite) => onToggleFavorite(task._id, isFavorite)}
+              size={28}
+              className="task-favorite"
+            />
+
+            {/* Data formatada */}
+            <span className="task-date">{formatDate(task.startDate)}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }

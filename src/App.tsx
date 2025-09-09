@@ -30,7 +30,10 @@ function App() {
       const tasksData = await taskService.getAllTasks(filters);
       setTasks(tasksData);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      const errorMessage =
+        error instanceof Error ? error.message : "An error occurred";
+      setError(errorMessage);
+      console.error("Error loading tasks:", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -55,25 +58,28 @@ function App() {
       await taskService.createTask(newTaskData);
       await loadTasks(currentFilters);
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to create task"
-      );
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create task";
+      setError(errorMessage);
+      console.error("Error creating task:", errorMessage);
+      setLoading(false);
     }
   };
 
   const handleToggleFavorite = async (
     taskId: string,
-    newFavoriteValue: boolean // Mude o nome do parâmetro
+    newFavoriteValue: boolean
   ) => {
     try {
       await taskService.updateTask(taskId, {
-        favorite: newFavoriteValue, // Use o novo valor diretamente
+        favorite: newFavoriteValue,
       });
       await loadTasks(currentFilters);
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to update task"
-      );
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update task";
+      setError(errorMessage);
+      console.error("Error updating task:", errorMessage);
     }
   };
 
@@ -82,15 +88,15 @@ function App() {
     currentComplete: boolean
   ) => {
     try {
-      // Agora envia APENAS o campo complete - o backend cuida do endDate!
       await taskService.updateTask(taskId, {
         complete: !currentComplete,
       });
       await loadTasks(currentFilters);
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to update task"
-      );
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update task";
+      setError(errorMessage);
+      console.error("Error updating task:", errorMessage);
     }
   };
 
@@ -105,17 +111,31 @@ function App() {
   const handleDeleteTask = async (taskId: string) => {
     try {
       await taskService.deleteTask(taskId);
-      await loadTasks(currentFilters); // Recarrega a lista após deletar
-      handleCloseModal(); // Fecha o modal se estiver aberto
+      await loadTasks(currentFilters);
+      handleCloseModal();
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to delete task"
-      );
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to delete task";
+      setError(errorMessage);
+      console.error("Error deleting task:", errorMessage);
     }
   };
 
+  const handleRetry = () => {
+    setError(null);
+    loadTasks(currentFilters);
+  };
+
   if (loading) return <div className="loading">Loading Tasks</div>;
-  if (error) return <div className="error">Error: {error}</div>;
+  if (error)
+    return (
+      <div className="error-container">
+        <div className="error">Error: {error}</div>
+        <button onClick={handleRetry} className="retry-btn">
+          Tentar Novamente
+        </button>
+      </div>
+    );
 
   return (
     <div className="app-container">

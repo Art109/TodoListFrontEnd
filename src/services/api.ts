@@ -16,25 +16,50 @@ const handleError = (error: any, context: string) => {
 
 export const taskService = {
   // GET ALL (filtered)
-  getAllTasks: async (filters?: {
-    favorite?: boolean;
-    color?: number;
-  }): Promise<Task[]> => {
+  getAllTasks: async (filters?: { favorite?: boolean; color?: number }) => {
     try {
-      const response = await api.get("/tasks", { params: filters });
+      const response = await axios.get(`${API_URL}/tasks`, {
+        params: filters,
+        timeout: 10000, // 10 segundos timeout
+      });
       return response.data;
     } catch (error) {
-      return handleError(error, "getAllTasks");
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          // Erro do servidor (4xx, 5xx)
+          throw new Error(
+            error.response.data.error ||
+              `Erro ${error.response.status}: ${error.response.statusText}`
+          );
+        } else if (error.request) {
+          // Erro de rede (sem resposta)
+          throw new Error(
+            "Erro de conexão. Verifique se o servidor está rodando."
+          );
+        } else {
+          // Erro na configuração
+          throw new Error("Erro na requisição: " + error.message);
+        }
+      }
+      throw error;
     }
   },
 
   // CREATE task
-  createTask: async (taskData: Omit<Task, "_id" | "__v">): Promise<Task> => {
+  createTask: async (taskData: any) => {
     try {
-      const response = await api.post("/tasks", taskData);
+      const response = await axios.post(`${API_URL}/tasks`, taskData, {
+        timeout: 10000,
+      });
       return response.data;
     } catch (error) {
-      return handleError(error, "createTask");
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(
+          error.response.data.error ||
+            `Erro ao criar task: ${error.response.status}`
+        );
+      }
+      throw new Error("Erro ao criar task");
     }
   },
 

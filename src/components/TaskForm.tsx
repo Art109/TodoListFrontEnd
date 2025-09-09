@@ -11,9 +11,22 @@ function TaskForm({ onTaskCreated }: TaskFormProps) {
   const [name, setName] = useState("");
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedColor, setSelectedColor] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!name.trim()) {
+      setError("Por favor, preencha o nome da tarefa");
+      return;
+    }
+
+    if (name.trim().length > 15) {
+      setError("O nome deve ter no máximo 15 caracteres");
+      return;
+    }
+
+    setError(null);
 
     const newTaskData: Omit<Task, "_id" | "__v"> = {
       name: name.trim(),
@@ -31,17 +44,23 @@ function TaskForm({ onTaskCreated }: TaskFormProps) {
     setSelectedColor(0);
   };
 
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+    if (error) {
+      setError(null);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="task-form-horizontal">
-      {/* Grupo do input + favorito */}
       <div className="form-group-horizontal input-with-favorite">
         <input
           type="text"
           placeholder="Nome da Tarefa"
           value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
+          onChange={handleNameChange}
           className="task-input"
+          style={{ borderColor: error ? "#ff4757" : "" }}
         />
         <FavoriteButton
           isFavorite={isFavorite}
@@ -49,6 +68,40 @@ function TaskForm({ onTaskCreated }: TaskFormProps) {
           size={28}
           className="favorite-in-input"
         />
+
+        {/* Balão de erro  */}
+        {error && (
+          <div
+            style={{
+              position: "absolute",
+              top: "-40px",
+              left: "0",
+              background: "#ff4757",
+              color: "white",
+              padding: "8px 12px",
+              borderRadius: "8px",
+              fontSize: "0.8rem",
+              fontWeight: "500",
+              zIndex: 1000,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {error}
+            {/* Seta do balão */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: "-8px",
+                left: "12px",
+                width: "0",
+                height: "0",
+                borderLeft: "8px solid transparent",
+                borderRight: "8px solid transparent",
+                borderTop: "8px solid #ff4757",
+              }}
+            ></div>
+          </div>
+        )}
       </div>
 
       {/* Dropdown de prioridades */}

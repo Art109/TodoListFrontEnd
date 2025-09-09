@@ -21,8 +21,8 @@ function TaskForm({ onTaskCreated }: TaskFormProps) {
       return;
     }
 
-    if (name.trim().length > 15) {
-      setError("O nome deve ter no máximo 15 caracteres");
+    if (name.trim().length > 100) {
+      setError("O nome deve ter no máximo 100 caracteres");
       return;
     }
 
@@ -61,6 +61,7 @@ function TaskForm({ onTaskCreated }: TaskFormProps) {
           onChange={handleNameChange}
           className="task-input"
           style={{ borderColor: error ? "#ff4757" : "" }}
+          required
         />
         <FavoriteButton
           isFavorite={isFavorite}
@@ -69,7 +70,6 @@ function TaskForm({ onTaskCreated }: TaskFormProps) {
           className="favorite-in-input"
         />
 
-        {/* Balão de erro  */}
         {error && (
           <div
             style={{
@@ -87,7 +87,6 @@ function TaskForm({ onTaskCreated }: TaskFormProps) {
             }}
           >
             {error}
-            {/* Seta do balão */}
             <div
               style={{
                 position: "absolute",
@@ -104,7 +103,6 @@ function TaskForm({ onTaskCreated }: TaskFormProps) {
         )}
       </div>
 
-      {/* Dropdown de prioridades */}
       <div className="form-group-horizontal">
         <PriorityDropdown
           value={selectedColor}
@@ -113,7 +111,6 @@ function TaskForm({ onTaskCreated }: TaskFormProps) {
         />
       </div>
 
-      {/* Botão de submit */}
       <div className="form-group-horizontal">
         <button type="submit" className="add-btn">
           Criar

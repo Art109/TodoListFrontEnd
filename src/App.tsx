@@ -27,7 +27,7 @@ function App() {
     try {
       setLoading(true);
       setError(null);
-      const tasksData = await taskService.getAllTasks(filters);
+      const tasksData: Task[] = await taskService.getAllTasks(filters);
       setTasks(tasksData);
     } catch (error) {
       const errorMessage =
@@ -54,7 +54,6 @@ function App() {
 
   const handleTaskCreated = async (newTaskData: Omit<Task, "_id" | "__v">) => {
     try {
-      setLoading(true);
       await taskService.createTask(newTaskData);
       await loadTasks(currentFilters);
     } catch (error) {
@@ -62,7 +61,6 @@ function App() {
         error instanceof Error ? error.message : "Failed to create task";
       setError(errorMessage);
       console.error("Error creating task:", errorMessage);
-      setLoading(false);
     }
   };
 
@@ -70,12 +68,29 @@ function App() {
     taskId: string,
     newFavoriteValue: boolean
   ) => {
+    const previousTasks = [...tasks];
+
+    // ✅ 1. ATUALIZAÇÃO OTIMISTA (Instantânea)
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task._id === taskId ? { ...task, favorite: newFavoriteValue } : task
+      )
+    );
+
     try {
+      // ✅ 2. API em segundo plano
       await taskService.updateTask(taskId, {
         favorite: newFavoriteValue,
       });
-      await loadTasks(currentFilters);
+
+      // ✅ 3. Sincroniza apenas a ordenação
+      const orderedTasks: Task[] = await taskService.getAllTasks(
+        currentFilters
+      );
+      setTasks(orderedTasks);
     } catch (error) {
+      // ✅ 4. Rollback em caso de erro
+      setTasks(previousTasks);
       const errorMessage =
         error instanceof Error ? error.message : "Failed to update task";
       setError(errorMessage);
@@ -87,12 +102,36 @@ function App() {
     taskId: string,
     currentComplete: boolean
   ) => {
+    const previousTasks = [...tasks];
+    const newCompleteValue = !currentComplete;
+
+    // ✅ 1. ATUALIZAÇÃO OTIMISTA
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task._id === taskId
+          ? {
+              ...task,
+              complete: newCompleteValue,
+              endDate: newCompleteValue ? new Date() : null,
+            }
+          : task
+      )
+    );
+
     try {
+      // ✅ 2. API em segundo plano
       await taskService.updateTask(taskId, {
-        complete: !currentComplete,
+        complete: newCompleteValue,
       });
-      await loadTasks(currentFilters);
+
+      // ✅ 3. Sincroniza ordenação
+      const orderedTasks: Task[] = await taskService.getAllTasks(
+        currentFilters
+      );
+      setTasks(orderedTasks);
     } catch (error) {
+      // ✅ 4. Rollback
+      setTasks(previousTasks);
       const errorMessage =
         error instanceof Error ? error.message : "Failed to update task";
       setError(errorMessage);
@@ -109,11 +148,24 @@ function App() {
   };
 
   const handleDeleteTask = async (taskId: string) => {
+    const previousTasks = [...tasks];
+
+    // ✅ 1. OTIMISTA - Remove instantaneamente
+    setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
+
     try {
+      // ✅ 2. API em segundo plano
       await taskService.deleteTask(taskId);
-      await loadTasks(currentFilters);
       handleCloseModal();
+
+      // ✅ 3. Sincroniza ordenação
+      const orderedTasks: Task[] = await taskService.getAllTasks(
+        currentFilters
+      );
+      setTasks(orderedTasks);
     } catch (error) {
+      // ✅ 4. Rollback
+      setTasks(previousTasks);
       const errorMessage =
         error instanceof Error ? error.message : "Failed to delete task";
       setError(errorMessage);
@@ -121,21 +173,8 @@ function App() {
     }
   };
 
-  const handleRetry = () => {
-    setError(null);
-    loadTasks(currentFilters);
-  };
-
   if (loading) return <div className="loading">Loading Tasks</div>;
-  if (error)
-    return (
-      <div className="error-container">
-        <div className="error">Error: {error}</div>
-        <button onClick={handleRetry} className="retry-btn">
-          Tentar Novamente
-        </button>
-      </div>
-    );
+  if (error) return <div className="error">Error: {error}</div>;
 
   return (
     <div className="app-container">

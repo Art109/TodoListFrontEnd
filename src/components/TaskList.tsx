@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { type Task } from "../types/Task";
 import { formatDate } from "../utils/dateFormatter";
 import { PRIORITY_MAP } from "../constants/priorities";
@@ -16,68 +17,86 @@ function TaskList({
   onToggleComplete,
   onOpenModal,
 }: TaskListProps) {
-  if (tasks.length === 0) {
-    return <p>No tasks found</p>;
-  }
+  const [loadingItems, setLoadingItems] = useState<Set<string>>(new Set());
 
-  const handleCheckboxClick = (
-    e: React.MouseEvent<HTMLInputElement>,
+  const handleToggleFavorite = async (taskId: string, isFavorite: boolean) => {
+    setLoadingItems((prev) => new Set(prev).add(taskId));
+    await onToggleFavorite(taskId, isFavorite);
+    setLoadingItems((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(taskId);
+      return newSet;
+    });
+  };
+
+  const handleToggleComplete = async (
     taskId: string,
     currentComplete: boolean
   ) => {
-    e.stopPropagation();
-    onToggleComplete(taskId, currentComplete);
+    setLoadingItems((prev) => new Set(prev).add(taskId));
+    await onToggleComplete(taskId, currentComplete);
+    setLoadingItems((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(taskId);
+      return newSet;
+    });
   };
 
-  const handleFavoriteClick = (taskId: string, isFavorite: boolean) => {
-    onToggleFavorite(taskId, isFavorite);
-  };
+  if (tasks.length === 0) {
+    return <p>No tasks found</p>;
+  }
 
   return (
     <div className="task-list">
       {tasks.map((task) => {
         const priority = PRIORITY_MAP[task.color || 0];
+        const isLoading = loadingItems.has(task._id);
 
         return (
           <div
             key={task._id}
-            className={`task-item ${task.complete ? "complete" : ""}`}
+            className={`task-item ${task.complete ? "complete" : ""} ${
+              isLoading ? "loading" : ""
+            }`}
             style={{
               backgroundColor: priority.bgColor,
               borderLeftColor: priority.color,
             }}
-            onClick={() => onOpenModal(task)}
+            onClick={() => !isLoading && onOpenModal(task)}
           >
-            {/* Checkbox de completo */}
             <input
               type="checkbox"
               checked={task.complete || false}
-              onChange={() =>
-                onToggleComplete(task._id, task.complete || false)
-              }
-              onClick={(e) =>
-                handleCheckboxClick(e, task._id, task.complete || false)
-              }
+              onChange={(e) => {
+                e.stopPropagation();
+                handleToggleComplete(task._id, task.complete || false);
+              }}
+              onClick={(e) => e.stopPropagation()}
               className="task-checkbox"
+              disabled={isLoading}
             />
 
-            {/* Nome da task */}
             <h3 className="task-name">{task.name}</h3>
 
-            {/* Botão favorito com prevenção de propagação */}
             <div onClick={(e) => e.stopPropagation()}>
               <FavoriteButton
                 isFavorite={task.favorite || false}
                 onChange={(isFavorite) =>
-                  handleFavoriteClick(task._id, isFavorite)
+                  handleToggleFavorite(task._id, isFavorite)
                 }
                 size={28}
                 className="task-favorite"
+                disabled={isLoading}
               />
             </div>
 
-            {/* Data formatada */}
             <span className="task-date">{formatDate(task.startDate)}</span>
+
+            {isLoading && (
+              <div className="task-loading-overlay">
+                <div className="loading-spinner"></div>
+              </div>
+            )}
           </div>
         );
       })}

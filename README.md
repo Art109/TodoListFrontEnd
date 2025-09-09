@@ -87,7 +87,6 @@ bash
 # Use no .env:
 MONGO_URI=mongodb://localhost:27017/todoapp
 
-
 🔹 Opção 2: MongoDB Atlas (Cloud - Production)
 Crie conta em MongoDB Atlas
 
@@ -105,18 +104,17 @@ Obtenha a connection string e use no .env
 4. Inicie o Backend
 bash
 # Com o .env configurado, inicie o servidor
-npm run dev
+node server.js
 O backend estará rodando em: http://localhost:3000
 
 5. Configuração do Frontend
 bash
 # Entre na pasta do frontend
-cd todo-list-frontend
 
 # Instale as dependências
 npm install
 
-# Inicie o servidor de desenvolvimento
+# Inicie o front
 npm run dev
 O frontend estará rodando em: http://localhost:5173
 
@@ -176,6 +174,8 @@ npx kill-port 3000
 npx kill-port 5173
 
 📋 Próximas Melhorias
+Retafotaração da estilização
+
 Autenticação de usuários
 
 Categorias personalizadas

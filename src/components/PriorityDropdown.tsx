@@ -13,7 +13,6 @@ function PriorityDropdown({
   className = "",
   ariaLabel = "Selecionar prioridade",
 }: PriorityDropdownProps) {
-  // Usa o PRIORITY_MAP para garantir que a prioridade existe
   const selectedPriority = PRIORITY_MAP[value] || PRIORITY_MAP[0];
 
   return (
@@ -22,7 +21,7 @@ function PriorityDropdown({
         value={value}
         onChange={(e) => {
           const newValue = Number(e.target.value);
-          // Garante que o valor é válido
+
           if (!isNaN(newValue) && PRIORITY_MAP[newValue]) {
             onChange(newValue);
           }

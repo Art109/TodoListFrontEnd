@@ -70,7 +70,6 @@ function App() {
   ) => {
     const previousTasks = [...tasks];
 
-    // ✅ 1. ATUALIZAÇÃO OTIMISTA (Instantânea)
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
         task._id === taskId ? { ...task, favorite: newFavoriteValue } : task
@@ -78,18 +77,15 @@ function App() {
     );
 
     try {
-      // ✅ 2. API em segundo plano
       await taskService.updateTask(taskId, {
         favorite: newFavoriteValue,
       });
 
-      // ✅ 3. Sincroniza apenas a ordenação
       const orderedTasks: Task[] = await taskService.getAllTasks(
         currentFilters
       );
       setTasks(orderedTasks);
     } catch (error) {
-      // ✅ 4. Rollback em caso de erro
       setTasks(previousTasks);
       const errorMessage =
         error instanceof Error ? error.message : "Failed to update task";
@@ -105,7 +101,6 @@ function App() {
     const previousTasks = [...tasks];
     const newCompleteValue = !currentComplete;
 
-    // ✅ 1. ATUALIZAÇÃO OTIMISTA
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
         task._id === taskId
@@ -119,18 +114,15 @@ function App() {
     );
 
     try {
-      // ✅ 2. API em segundo plano
       await taskService.updateTask(taskId, {
         complete: newCompleteValue,
       });
 
-      // ✅ 3. Sincroniza ordenação
       const orderedTasks: Task[] = await taskService.getAllTasks(
         currentFilters
       );
       setTasks(orderedTasks);
     } catch (error) {
-      // ✅ 4. Rollback
       setTasks(previousTasks);
       const errorMessage =
         error instanceof Error ? error.message : "Failed to update task";
@@ -150,21 +142,17 @@ function App() {
   const handleDeleteTask = async (taskId: string) => {
     const previousTasks = [...tasks];
 
-    // ✅ 1. OTIMISTA - Remove instantaneamente
     setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
 
     try {
-      // ✅ 2. API em segundo plano
       await taskService.deleteTask(taskId);
       handleCloseModal();
 
-      // ✅ 3. Sincroniza ordenação
       const orderedTasks: Task[] = await taskService.getAllTasks(
         currentFilters
       );
       setTasks(orderedTasks);
     } catch (error) {
-      // ✅ 4. Rollback
       setTasks(previousTasks);
       const errorMessage =
         error instanceof Error ? error.message : "Failed to delete task";

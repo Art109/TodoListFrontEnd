@@ -20,24 +20,21 @@ export const taskService = {
     try {
       const response = await axios.get(`${API_URL}/tasks`, {
         params: filters,
-        timeout: 10000, // 10 segundos timeout
+        timeout: 10000,
       });
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response) {
-          // Erro do servidor (4xx, 5xx)
           throw new Error(
             error.response.data.error ||
               `Erro ${error.response.status}: ${error.response.statusText}`
           );
         } else if (error.request) {
-          // Erro de rede (sem resposta)
           throw new Error(
             "Erro de conexão. Verifique se o servidor está rodando."
           );
         } else {
-          // Erro na configuração
           throw new Error("Erro na requisição: " + error.message);
         }
       }

@@ -11,7 +11,6 @@
   --spacing-lg: 2rem;
   --border-radius: 12px;
 
-  /* Novas cores suaves para prioridades */
   --priority-none: #f8f9fa;
   --priority-low: #e3f2fd;
   --priority-medium: #e8f5e9;
@@ -19,7 +18,6 @@
   --priority-urgent: #ffebee;
   --priority-critical: #fce4ec;
 
-  /* Cores de texto para prioridades */
   --priority-text-none: #666;
   --priority-text-low: #1976d2;
   --priority-text-medium: #388e3c;
@@ -48,7 +46,6 @@ body {
   position: relative;
 }
 
-/* Overlay escuro para melhor contraste */
 body::before {
   content: "";
   position: fixed;
@@ -173,7 +170,6 @@ body::before {
   filter: drop-shadow(0 0 6px rgba(255, 217, 0, 0.6));
 }
 
-/* Tamanhos específicos para cada contexto */
 .task-form-horizontal .favorite-btn {
   width: 44px;
   height: 44px;
@@ -207,7 +203,6 @@ body::before {
   box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
 }
 
-/* Estilos para as opções de prioridade */
 .priority-dropdown option[value="0"] {
   background: var(--priority-none);
   color: var(--priority-text-none);
@@ -352,7 +347,6 @@ body::before {
   z-index: 1;
 }
 
-/* Cores de prioridade para os items da task */
 .task-item[style*="color: 0"] {
   border-left-color: #ccc;
   background-color: var(--priority-none);
@@ -473,11 +467,11 @@ body::before {
 .modal-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start; /* ✅ Alinhar no topo */
+  align-items: flex-start;
   padding: 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   position: relative;
-  min-height: 120px; /* ✅ Espaço para as datas */
+  min-height: 120px;
 }
 
 .modal-actions-top {
@@ -832,7 +826,6 @@ body::before {
   font-size: 12px;
 }
 
-/* Estilos para as opções (ainda aparecem no dropdown) */
 .priority-dropdown-select option {
   padding: 12px;
   font-size: 14px;
@@ -863,18 +856,15 @@ body::before {
   color: var(--priority-text-critical);
 }
 
-/* Estilo específico para o formulário horizontal */
 .priority-dropdown-form .priority-dropdown-select {
   min-width: 140px;
   height: 100%;
 }
 
-/* Estilo específico para o modal */
 .priority-dropdown-modal .priority-dropdown-select {
   width: 100%;
 }
 
-/* Garantir que o dropdown seja visível no modal */
 .modal-form .priority-dropdown-container {
   width: 100%;
 }
@@ -890,8 +880,8 @@ body::before {
 
 .input-with-favorite .task-input {
   flex: 1;
-  min-width: 0; /* Permite que o input encolha */
-  padding-right: 50px; /* Espaço para a estrela */
+  min-width: 0;
+  padding-right: 50px;
 }
 
 .input-with-favorite .favorite-in-input {
@@ -902,7 +892,6 @@ body::before {
   margin: 0;
 }
 
-/* Responsividade para o grupo */
 @media (max-width: 768px) {
   .input-with-favorite {
     width: 100%;
@@ -1010,7 +999,6 @@ body::before {
   border-color: #ccc;
 }
 
-/* Melhorar a legibilidade das opções */
 .filter-select option {
   padding: 12px;
   font-size: 1rem;
@@ -1018,7 +1006,6 @@ body::before {
   color: #333;
 }
 
-/* Estilizar as opções de prioridade */
 .filter-select option[value="0"] {
   background: var(--priority-none);
   color: var(--priority-text-none);
@@ -1098,7 +1085,6 @@ body::before {
   transform: translateY(-1px);
 }
 
-/* Indicador visual de filtros ativos */
 .filters-active {
   border-left: 4px solid var(--primary-color);
 }
@@ -1325,7 +1311,6 @@ body::before {
   box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
 }
 
-/* Estilo para prioridades */
 .filter-group:nth-child(2) .filter-preview {
   border-left: 4px solid;
 }

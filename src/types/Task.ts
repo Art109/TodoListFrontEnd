@@ -7,5 +7,5 @@ export interface Task {
   complete?: boolean;
   startDate: Date;
   endDate?: Date | null;
-  __v?: number; // Campo opcional do MongoDB
+  __v?: number;
 }
